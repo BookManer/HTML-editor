@@ -28,8 +28,8 @@ namespace HTML_editor
 
                     if (!string.IsNullOrEmpty(el.Value))
                     {
-                        _marks.Add(new Tuple<int, int, Color>(_richTextBox.Text.Length, el.Value.Length, Color.Green));
-                        _richTextBox.Text += el.Value + " ";
+                        _marks.Add(new Tuple<int, int, Color>(_richTextBox.Text.Length+1, el.Value.Length, Color.Green));
+                        _richTextBox.Text += "\""+el.Value + "\" ";
 
                     }
                     else

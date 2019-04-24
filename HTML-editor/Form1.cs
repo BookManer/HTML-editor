@@ -39,6 +39,7 @@ namespace HTML_editor
             int indexCurrentLine = richTextBox1.GetLineFromCharIndex(richTextBox1.SelectionStart);
 
             webBrowser1.DocumentText = richTextBox1.Text;
+            
 
             if (richTextBox1.Lines.Length != 0)
             {
