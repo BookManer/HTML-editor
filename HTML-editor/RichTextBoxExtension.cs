@@ -64,7 +64,15 @@ namespace HTML_editor
         {
             _richTextBox = textBox;
             var text = textBox.Text;
-            XDocument document = XDocument.Parse(text);
+            XDocument document = null;
+            try
+            {
+                document = XDocument.Parse(textBox.Text);
+            }
+            catch(Exception ex)
+            {
+                return;
+            }
             textBox.Clear();
             _marks.Clear();
             var elements = document.Elements();
