@@ -75,6 +75,7 @@ namespace HTML_editor
             }
             textBox.Clear();
             _marks.Clear();
+            textBox.Text += document.DocumentType+"\n";
             var elements = document.Elements();
             foreach (var el in elements)
             {
