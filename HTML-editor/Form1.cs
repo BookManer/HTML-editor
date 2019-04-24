@@ -42,6 +42,7 @@ namespace HTML_editor
 
             if (richTextBox1.Lines.Length != 0)
             {
+                //richTextBox1.PaintText();
                /* var matches = Regex.Matches(richTextBox1.Text, @"</?\w+>");
 
                 int index = richTextBox1.SelectionStart;
@@ -145,6 +146,7 @@ namespace HTML_editor
             {
                 StreamReader read = new StreamReader(openFileDialog1.FileName);
                 richTextBox1.Text = read.ReadToEnd();
+                richTextBox1.PaintText();
                 read.Close();
             }
         }
@@ -163,6 +165,11 @@ namespace HTML_editor
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
 
+        }
+
+        private void RichTextBox1_Leave(object sender, EventArgs e)
+        {
+            richTextBox1.PaintText();
         }
     }
 
