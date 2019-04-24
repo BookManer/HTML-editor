@@ -88,6 +88,7 @@ namespace HTML_editor
                 textBox.SelectionLength = el.Item2;
                 textBox.SelectionColor = el.Item3;
             }
+
     
             
 
