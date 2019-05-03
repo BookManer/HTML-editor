@@ -1,207 +1,241 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Text.RegularExpressions;
-using System.IO;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.util.regex.Matcher;  
+import java.util.regex.Pattern; 
+import java.lang.*;
+import java.io.*;
 
-namespace HTML_editor
-{
+PFont font;
+String textCode = "";
+int fontSize = 24;
+int indentWord = 10;
+color tegColor = color(250, 123, 170);
+color mainColor = color(250, 250, 250);
+int curStartXWord = 1;
+int curStartYWord = 1;
+int caretkaX = 1;
+int caretkaY = 1;
+ArrayList<Integer> lineLengths = new ArrayList<Integer>();
+boolean isActiveCaretka = false;
+int indexInsertChar = 0;
+String debagLeftPart = "";
+String debagRightPart = "";
 
-    public partial class Form1 : Form
-    {
+void setup() {
+  size(1240, 980);
+  //println(PFont.list());
+  background(30, 30, 30, 0.8);
+  font = createFont("Candara", fontSize);
+  textFont(font);
+  textSize(fontSize);
+}
 
-        public string bufferText = "Привет, меня зовут Андрей\nА как зовут тебя!?)\nНовая строка\nСнова новая строка :)";
-        List<List<MatchObject>> savedMatches = new List<List<MatchObject>>();
+void draw() {
+  fill(50, 20, 50);
+  rect(0,0,width,height);
+  drawText();
+  drawCaretka();
+  
+  //Debug data
+  text(caretkaX + ":" + caretkaY, width-150,0+50);
+  text("curStartXWord= " + textCode.length(), width-150,0+100);
+  text("indexInsetX= " + indexInsertChar, width-150,0+130);
+  text("ca= " + debagLeftPart, width-150, 0+160);
+  text("RightPart= " + debagLeftPart, width-150, 0+190);
+  text("TextCode= " + textCode, width-150, 0+220);
+}
 
-        public Form1()
-        {
-            InitializeComponent();
-        }
-
-        private void Form1_Load(object sender, EventArgs e) 
-        {
-
-        }
-
-        private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void richTextBox1_TextChanged(object sender, EventArgs e)
-        {
-            int indexCurrentLine = richTextBox1.GetLineFromCharIndex(richTextBox1.SelectionStart);
-
-            webBrowser1.DocumentText = richTextBox1.Text;
-            
-
-            if (richTextBox1.Lines.Length != 0)
-            {
-                //richTextBox1.PaintText();
-               /* var matches = Regex.Matches(richTextBox1.Text, @"</?\w+>");
-
-                int index = richTextBox1.SelectionStart;
-
-                foreach (var match in matches.Cast<Match>())
-                {
-                    richTextBox1.Select(match.Index, match.Length);
-                    richTextBox1.SelectionColor = Color.Orange;
-                    richTextBox1.SelectionStart = index;
-                }
-
-                richTextBox1.SelectionColor = Color.White;
-
-                /*isContainMatch = false;
-                foreach (MatchObject mObject in savedMatches.ElementAt(indexCurrentLine)) {
-                    Console.WriteLine(richTextBox1.SelectionStart + " : " + mObject.endIndexCharInLine);
-                    if (mObject.endIndexCharInLine <= richTextBox1.SelectionStart-1)
-                    {
-                        isContainMatch = true;
-                    }
-                }
-
-                if (!isContainMatch)
-                {
-                    List<MatchObject> matchObjects = savedMatches.ElementAt(indexCurrentLine);
-                    matchObjects.Add(new MatchObject(match.Value, richTextBox1.SelectionStart + match.Value.Length));
-                    richTextBox1.Text.Replace(richTextBox1.Text.Substring(1, match.Value.Length - 1), "");
-                    int size;
-
-                    if (match.Value.Contains("/"))
-                    {
-                        size = richTextBox1.Lines.Length-1;
-                    } else
-                    {
-                        size = richTextBox1.Lines.Length;
-                    }
-
-                    for (int i = 0; i < size; i++)
-                    {
-                        richTextBox1.AppendText("   ", Color.White);
-                    }
-
-                }*/
-            }
-            
-            /* if (richTextBox1.Lines[indexCurrentLine].Contains("<") &&
-                richTextBox1.Lines[indexCurrentLine].Contains(">") &&
-                (indexStartTag < indexEndTag))
-            {
-                richTextBox1.Select(richTextBox1.Lines[indexCurrentLine].LastIndexOf('<'), richTextBox1.Lines[indexCurrentLine].LastIndexOf('>')+1);
-                richTextBox1.SelectionColor = Color.Magenta;
-                int indexStartFirstAttr = currentLine.IndexOf(' ');
-                if (indexStartFirstAttr != -1)
-                {
-                    int lsdg = currentLine.LastIndexOf(' ');
-                    int indexEndLastAttr = currentLine.Substring(2, indexEndTag-1).Length;
-                    richTextBox1.AppendText("\n\n"+currentLine.Substring(indexStartTag, indexStartFirstAttr) + currentLine.Substring(indexEndLastAttr, indexEndTag) + "\n");
-                } else
-                {
-                    richTextBox1.AppendText("\n\n</"+currentLine.Substring(indexStartTag+1, indexEndTag) + "\n");
-                }
-            }*/
-        }
-
-        private void splitContainer1_Panel2_Resize(object sender, EventArgs e)
-        {
-            richTextBox1.Size = splitContainer1.Panel2.Size;
-        }
-
-        private void richTextBox1_KeyUp(object sender, KeyEventArgs e)
-        {
-           if(e.KeyCode == Keys.ControlKey && e.KeyCode == Keys.V)
-            {
-                string newStrings = Clipboard.GetText();
-                List<string> lines = richTextBox1.Lines.Cast<string>().ToList();
-                for (int i = 0; i < bufferText.Length; i++)
-                {
-                    if (bufferText[i] != '\n')
-                    {
-                        newStrings += bufferText[i];
-                    }
-                    else
-                    {
-                        lines.Insert(richTextBox1.GetLineFromCharIndex(richTextBox1.SelectionStart), newStrings);
-                        newStrings = "";
-                    }
-                }
-                richTextBox1.Lines = lines.ToArray();
-            } 
-        }
-
-        public void insertTextFromClipboard(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            DialogResult dr = openFileDialog1.ShowDialog();
-            if(dr == DialogResult.OK)
-            {
-                StreamReader read = new StreamReader(openFileDialog1.FileName);
-                richTextBox1.Text = read.ReadToEnd();
-                richTextBox1.PaintText();
-                read.Close();
-            }
-        }
-
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            DialogResult dr = saveFileDialog1.ShowDialog();
-            if(dr == DialogResult.OK)
-            {
-                StreamWriter write = new StreamWriter(saveFileDialog1.FileName);
-                write.WriteLine(richTextBox1.Text);
-                write.Close();
-            }
-        }
-
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
-        private void RichTextBox1_Leave(object sender, EventArgs e)
-        {
-            //richTextBox1.PaintText();
-        }
-
-        private void RichTextBox1_Leave_1(object sender, EventArgs e)
-        {
-            richTextBox1.PaintText();
-        }
+void drawText() {
+  Pattern patternTag = Pattern.compile("</?\\w*>");
+  Matcher tags = patternTag.matcher(textCode);
+  
+  for(int i = 0, j = 1, y = 1; i < textCode.length(); i++,j++) {
+    textAlign(CENTER, BASELINE);
+    if(textCode.charAt(i)=='\n') {y += 1;j=0;}
+    fill(255);
+    while(tags.find()) {
+      if(i > tags.start() && i < tags.end()-1) {
+        fill(250, 20, 20);
+      }
     }
+    tags.reset();
+    text(textCode.charAt(i), j*(fontSize-6), y*fontSize);
+  }
+}
 
-    public static class RichTextBoxExtensions
-    {
-        public static void AppendText(this RichTextBox box, string text, Color color)
-        {
-            box.SelectionStart = box.TextLength;
-            box.SelectionLength = 0;
+void drawCaretka() {
+  fill(120, 250, 120);
+  rect((caretkaX-1)*(fontSize-6), (caretkaY-1)*fontSize, fontSize/4, fontSize);
+}
 
-            box.SelectionColor = color;
-            box.AppendText(text);
-            box.SelectionColor = box.ForeColor;
-        }
+void keyPressed() {
+   if(lineLengths.size() != 0) {
+    lineLengths = new ArrayList<Integer>();
+    String repliceTextCode = new String(String.valueOf(textCode));
+    int count = 0;
+    
+    for(int i = 0; i < textCode.length(); i++) {    
+      if(textCode.charAt(i) == '\n') { 
+        String curLine = repliceTextCode.substring(0, repliceTextCode.indexOf('\n')+1);
+        repliceTextCode = repliceTextCode.substring(repliceTextCode.indexOf('\n')+1, repliceTextCode.length());
+        
+        lineLengths.add(curLine.length());
+      }
     }
-
-    class MatchObject
-    {
-        public string Value;
-        public int endIndexCharInLine;
-
-        public MatchObject(string v, int sicil)
-        {
-            this.Value = v;
-            this.endIndexCharInLine = sicil;
+  }
+  
+  if(keyCode == TAB) {
+    String[] res = getIndexInsertChar();
+    textCode = res[0] + '\t' + res[1];
+    caretkaX++;
+    curStartXWord++;
+  }
+  
+  if(keyCode == ENTER) {
+      
+      String[] res = getIndexInsertChar();
+      textCode = res[0] + '\n' + res[1];
+    
+      caretkaY++;
+      curStartYWord++;
+      curStartXWord++;
+      caretkaX = 1;
+      
+      Pattern p = Pattern.compile("\\n");  
+      Matcher matches = p.matcher(textCode);
+      
+      lineLengths = new ArrayList<Integer>();
+      int countStart = 0;
+      
+      while(matches.find()) {
+         //println(textCode.substring(countStart,matches.end()));
+         int lengthLine = textCode.substring(countStart,matches.end()).length();
+         lineLengths.add(lengthLine);
+         countStart += lengthLine;
+      }
+  }
+  if(keyCode == BACKSPACE) {
+    
+    if(textCode.length() != 0) {
+        
+        String[] res = getIndexInsertChar();
+        textCode = res[0].substring(0, res[0].length()-1) + res[1];
+      
+        if(caretkaX == 1) {
+          caretkaX = lineLengths.get(caretkaY-2);
+          lineLengths.remove(caretkaY-2);
+          caretkaY--;
+          curStartYWord--;
+        } else {
+          caretkaX--;
         }
+        
+        curStartXWord--;
     }
+  } 
+  
+  switch(keyCode) {
+    case 37:
+      if(caretkaY != 1) {
+        if(caretkaX > 1) {
+          caretkaX--;
+        } else {
+          int s = lineLengths.size() != 0 ? lineLengths.get(caretkaY-2) : textCode.length();
+          caretkaX = s;
+          caretkaY--;
+        }
+      } else {
+        caretkaX = (caretkaX > 1) ? --caretkaX : 1;
+      }
+      break;
+    case 38:
+      if(lineLengths.size() != 0) {
+        if(caretkaY != 1 && caretkaX > lineLengths.get(caretkaY-2)) {
+          caretkaX = lineLengths.get(caretkaY-2);
+        }
+      }
+      caretkaY -= (caretkaY > 1) ? 1 : 0;
+      break;
+    case 39:
+      if(caretkaY != curStartYWord) {
+        int s = lineLengths.size() != 0 ? lineLengths.get(caretkaY-1) : textCode.length();
+        if(caretkaX < s) {
+           caretkaX++;
+        } else {
+          caretkaX = 1;
+          caretkaY++;
+        }
+      } else {
+        int lastLineLength;
+        if(textCode.lastIndexOf('\n') != -1) {
+          lastLineLength = textCode.length() - (textCode.substring(0, textCode.lastIndexOf('\n')).length());
+        } else {
+          lastLineLength = textCode.length()+1;
+        }
+        if(caretkaX < lastLineLength) {
+           caretkaX++;
+        }
+      }
+      break;
+    case 40:
+      if(caretkaY < curStartYWord) {
+        int lengthSummaLines = 0;
+        for(int i = 0; i < caretkaY; i++) {lengthSummaLines += lineLengths.get(i);}
+        int line = caretkaY != lineLengths.size() ? lineLengths.get(caretkaY) : textCode.length() - lengthSummaLines;
+        if(lineLengths.size() != 0 && (caretkaX > line)) {
+          String downPart = textCode.substring(lengthSummaLines, textCode.length());
+          println(downPart);
+          int startSliceIndex = downPart.indexOf('\n') != -1 ?  downPart.indexOf('\n') : downPart.length();
+          caretkaX = (downPart.length() - downPart.substring(startSliceIndex, downPart.length()).length())+1;
+        }
+        caretkaY++;
+      }
+      break;
+      
+ }
+  
+  if(((keyCode <= 15 || keyCode >= 21) && keyCode != 8 && keyCode != 10 && !(keyCode >= 37 && keyCode <= 40)) || (keyCode >= 65 && keyCode <= 90)) {
+    try {
+      String[] res = getIndexInsertChar();
+      textCode = res[0] + key + res[1];
+      
+      curStartXWord += 1; 
+      caretkaX++;
+       
+    } catch(StringIndexOutOfBoundsException exp) {
+      println("ERROR!!!");
+    }
+  }
+}
 
+String[] getIndexInsertChar() {
+  String[] result = new String[2];
+  String leftPart;
+  String rightPart;
+  indexInsertChar = 0;
+  
+  for(int i = 0; i < caretkaY-1; i++) { indexInsertChar += lineLengths.get(i); }
+  
+  indexInsertChar += caretkaX;
+  
+  if(textCode.length() != 0) {
+    if(indexInsertChar != curStartXWord) {
+      leftPart = textCode.substring(0, indexInsertChar-1);
+      rightPart = textCode.substring(indexInsertChar-1, textCode.length());
+    } else {
+      leftPart = textCode;
+      rightPart = "";
+    }
+  } else {
+    leftPart = "";
+    rightPart = "";
+  }
+  
+  debagLeftPart = leftPart;
+  debagRightPart = rightPart;
+  
+  result[0] = leftPart;
+  result[1] = rightPart;
+  
+  return result;
 }
